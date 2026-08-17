@@ -1681,11 +1681,10 @@ footer { margin-top: 18px; color: var(--muted); font-size: 13px; }
   var search = document.getElementById('search');
   var count = document.getElementById('count');
   var empty = document.getElementById('empty');
-  var total = rows.length;
-
   var allcb = document.getElementById('allcb');
   var dl = document.getElementById('dl');
   var fmt = document.getElementById('format');
+  var total = rows.length;
 
   var index = rows.map(function (tr) {
     return {
@@ -1700,6 +1699,10 @@ footer { margin-top: 18px; color: var(--muted); font-size: 13px; }
   function visible(it) { return it.tr.style.display !== 'none'; }
   function chosen() { return index.filter(function (it) { return it.cb.checked; }); }
 
+  function paint() {
+    index.forEach(function (x) { x.tr.classList.toggle('sel', x.cb.checked); });
+  }
+
   function syncTools() {
     var n = chosen().length;
     dl.disabled = n === 0;
@@ -1708,8 +1711,7 @@ footer { margin-top: 18px; color: var(--muted); font-size: 13px; }
     var checkedVis = vis.filter(function (it) { return it.cb.checked; }).length;
     allcb.checked = vis.length > 0 && checkedVis === vis.length;
     allcb.indeterminate = checkedVis > 0 && checkedVis < vis.length;
-    var shown = vis.length;
-    count.textContent = (shown === total ? total + ' varer' : shown + ' af ' + total) + (n ? ', ' + n + ' valgt' : '');
+    count.textContent = (vis.length === total ? total + ' varer' : vis.length + ' af ' + total) + (n ? ', ' + n + ' valgt' : '');
   }
 
   function render(q) {
@@ -1734,14 +1736,14 @@ footer { margin-top: 18px; color: var(--muted); font-size: 13px; }
         }
       }
       lastClicked = i;
-      index.forEach(function (x) { x.tr.classList.toggle('sel', x.cb.checked); });
+      paint();
       syncTools();
     });
   });
 
   allcb.addEventListener('change', function () {
     index.filter(visible).forEach(function (it) { it.cb.checked = allcb.checked; });
-    index.forEach(function (x) { x.tr.classList.toggle('sel', x.cb.checked); });
+    paint();
     syncTools();
   });
 
@@ -1810,10 +1812,9 @@ footer { margin-top: 18px; color: var(--muted); font-size: 13px; }
 
   function svgString(it, size) {
     var s = new XMLSerializer().serializeToString(it.svg);
-    s = s.replace(/sclass="qr"/, '').replace(/srole="img"/, '').replace(/saria-label="[^"]*"/, '');
+    s = s.replace(/\sclass="qr"/, '').replace(/\srole="img"/, '').replace(/\saria-label="[^"]*"/, '');
     if (size) s = s.replace('<svg', '<svg width="' + size + '" height="' + size + '"');
-    return '<?xml version="1.0" encoding="UTF-8"?>
-' + s;
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + s;
   }
 
   function toPng(it, size) {
@@ -1844,7 +1845,7 @@ footer { margin-top: 18px; color: var(--muted); font-size: 13px; }
     if (!picked.length) return;
     var format = fmt.value;
     var enc = new TextEncoder();
-    var label = dl.textContent;
+    var label = 'Download zip (' + picked.length + ')';
     dl.disabled = true;
 
     var work;
@@ -1878,7 +1879,7 @@ footer { margin-top: 18px; color: var(--muted); font-size: 13px; }
       setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
       dl.textContent = label;
       dl.disabled = false;
-    }).catch(function (e) {
+    })['catch'](function (e) {
       alert('Kunne ikke bygge zip: ' + e.message);
       dl.textContent = label;
       dl.disabled = false;
