@@ -64,10 +64,11 @@ button.print {
 }
 button.print:hover { background: var(--hover); }
 .spacer { flex: 1 1 auto; }
-#format {
+#format, #cat {
   padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
-  background: var(--panel); color: var(--text); font-size: 14px;
+  background: var(--panel); color: var(--text); font-size: 14px; cursor: pointer;
 }
+#format:focus, #cat:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
 button.dl {
   padding: 10px 16px; border: 1px solid transparent; border-radius: 10px;
   background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
